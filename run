@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# set the install base
+INSTALL_BASE=${INSTALL_BASE-/opt}
+
+# application settings
+APP_HOME=$INSTALL_BASE/nodeapp
+APP_GITURL=${APP_GITURL-https://github.com/DamonOehlman/node-nginx-starterkit}
+
+# specify required packages
+REQUIRED_PACKAGES=( git build-essential libpcre3 libpcre3-dev libpcrecpp0 libssl-dev zlib1g-dev )
+
+# get the last apt-update time and then get the current date
+DT_LASTUPDATE=`stat -c %Y /var/lib/apt/periodic/update-success-stamp`
+DT_NEXTUPDATE=$((DT_LASTUPDATE + 86400))
+DT_NOW=`date +%s`
+
+# update and upgrade packages if it hasn't been done in the last day
+if ((DT_NEXTUPDATE < DT_NOW))
+then
+	echo "==> Refreshing package data"
+	apt-get update > /dev/null
+fi
+
+echo "==> Updating installed packages"
+apt-get -y upgrade > /dev/null
+
+# ensure we have all the required packages to install
+echo "==> Checking system packages"
+for PKGNAME in ${REQUIRED_PACKAGES[@]}
+do
+	dpkg -s "$PKGNAME" >/dev/null 2>&1 && {
+        echo "- required package $PKGNAME installed"
+    } || {
+        echo "- installing required package $PKGNAME"
+        apt-get -y install $PKGNAME > /dev/null
+    }
+done
+
+# ensure we have services setup
+echo "==> Checking service configurations";
+if [ ! -e /etc/init/nginx.conf ]
+then
+	echo "==> Installing nginx service";
+fi

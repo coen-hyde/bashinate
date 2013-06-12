@@ -1,0 +1,32 @@
+#!/bin/bash
+NGINX_VERSION=${NGINX_VERSION-1.4.1}
+NGINX_SOURCE=http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz
+
+# if we don't have nginx installed, then install
+echo "==> Checking Nginx version $NGINX_VERSION installed"
+if [ ! -e $INSTALL_BASE/nginx-$NGINX_VERSION ]
+then
+	echo "==> Installing Nginx $NGINX_VERSION";
+	echo "- downloading source from $NGINX_SOURCE";
+
+	cd /usr/src
+	wget -nc --quiet $NGINX_SOURCE \
+		|| (echo "!!! Unable to download nginx source" & exit 1)
+
+	tar xf nginx-$NGINX_VERSION.tar.gz
+	cd nginx-$NGINX_VERSION
+
+	# configure nginx
+	echo "- configuring"
+	./configure --with-pcre --with-http_ssl_module --with-http_spdy_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_stub_status_module --prefix=/opt/nginx-$NGINX_VERSION \
+		|| (echo "!!! Nginx source configuration failed" & exit 1)
+
+	# make nginx and install
+	echo "- compiling and installing"
+	make && make install \
+		|| (echo "!!! Nginx build failed" & exit 1)
+fi
+
+# create the appropriate nginx links
+ln -sf $INSTALL_BASE/nginx-$NGINX_VERSION /opt/nginx
+
