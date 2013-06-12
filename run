@@ -1,45 +1,29 @@
 #!/bin/bash
 
-# set the install base
-INSTALL_BASE=${INSTALL_BASE-/opt}
+# initialise locations
+ORC_HOME=~/.orc
 
-# application settings
-APP_HOME=$INSTALL_BASE/nodeapp
-APP_GITURL=${APP_GITURL-https://github.com/DamonOehlman/node-nginx-starterkit}
+# initialise elements remote and local
+ELEMENTS_REMOTE=https://raw.github.com/DamonOehlman/orc/master/elements
+ELEMENTS_LOCAL=$ORC_HOME/elements
 
-# specify required packages
-REQUIRED_PACKAGES=( git build-essential libpcre3 libpcre3-dev libpcrecpp0 libssl-dev zlib1g-dev )
+# ## require(element *args)
+# The require function is used to include a particular element in the provisioning process.  For instance,
+# if you wanted to orchestrate the installation of node then you would use a statement similar to the one
+# below:
+#
+# ```bash
+# require node
+# ```
+function require {
+	# first look in an elements directory relative to the current working directory
+	el=$(pwd)/elements/$1
 
-# get the last apt-update time and then get the current date
-DT_LASTUPDATE=`stat -c %Y /var/lib/apt/periodic/update-success-stamp`
-DT_NEXTUPDATE=$((DT_LASTUPDATE + 86400))
-DT_NOW=`date +%s`
+	# if we don't have a cwd element override, use the local repository
+	[[ -f $el ]] || el=$ELEMENTS_LOCAL/$1
 
-# update and upgrade packages if it hasn't been done in the last day
-if ((DT_NEXTUPDATE < DT_NOW))
-then
-	echo "==> Refreshing package data"
-	apt-get update > /dev/null
-fi
+	echo $el
+}
 
-echo "==> Updating installed packages"
-apt-get -y upgrade > /dev/null
-
-# ensure we have all the required packages to install
-echo "==> Checking system packages"
-for PKGNAME in ${REQUIRED_PACKAGES[@]}
-do
-	dpkg -s "$PKGNAME" >/dev/null 2>&1 && {
-        echo "- required package $PKGNAME installed"
-    } || {
-        echo "- installing required package $PKGNAME"
-        apt-get -y install $PKGNAME > /dev/null
-    }
-done
-
-# ensure we have services setup
-echo "==> Checking service configurations";
-if [ ! -e /etc/init/nginx.conf ]
-then
-	echo "==> Installing nginx service";
-fi
+# ensure we have an ~/.orc directory
+mkdir -p $ELEMENTS_LOCAL

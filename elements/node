@@ -1,35 +1,37 @@
 #!/bin/bash
-NODE_VERSION=${NODE_VERSION-0.10.10}
-NODE_SOURCE=http://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION.tar.gz
+PACKAGE_VERSION=${PACKAGE_VERSION-0.10.10}
+PACKAGE_SOURCE=http://nodejs.org/dist/v$PACKAGE_VERSION/node-v$PACKAGE_VERSION.tar.gz
+
+require packages build-essential
 
 # if we don't have the latest node version, then install
-echo "==> Checking Node version $NODE_VERSION installed";
-if [ ! -e $INSTALL_BASE/node/$NODE_VERSION ]
+echo "==> Checking Node version $PACKAGE_VERSION installed";
+if [ ! -e $INSTALL_BASE/node/$PACKAGE_VERSION ]
 then
-	echo "==> Installing Node.js version $NODE_VERSION"
-	echo "- downloading source from $NODE_SOURCE"
+	echo "==> Installing Node.js version $PACKAGE_VERSION"
+	echo "- downloading source from $PACKAGE_SOURCE"
 
 	cd /usr/src
-	wget -nc --quiet $NODE_SOURCE \
+	wget -nc --quiet $PACKAGE_SOURCE \
 		|| (echo "!!! Unable to download node source files" & exit 1)
 
-	tar xf node-v$NODE_VERSION.tar.gz
-	cd node-v$NODE_VERSION
+	tar xf node-v$PACKAGE_VERSION.tar.gz
+	cd node-v$PACKAGE_VERSION
 
 	# configure 
 	echo "- configuring"
-	./configure --prefix=$INSTALL_BASE/node/$NODE_VERSION \
+	./configure --prefix=$INSTALL_BASE/node/$PACKAGE_VERSION \
 		|| (echo "!!! Unable to configure node build" & exit 1)
 
 	# make and install
 	echo "- compiling and installing"
 	make && make install \
-		|| (echo "!!! Unable to make node $NODE_VERSION" & exit 1)
+		|| (echo "!!! Unable to make node $PACKAGE_VERSION" & exit 1)
 fi
 
 # create node application links (if we have the version available)
-if [ -e $INSTALL_BASE/node/$NODE_VERSION ]
+if [ -e $INSTALL_BASE/node/$PACKAGE_VERSION ]
 then
-	ln -sf $INSTALL_BASE/node/$NODE_VERSION/bin/node /usr/bin/node
-	ln -sf $INSTALL_BASE/node/$NODE_VERSION/bin/npm /usr/bin/npm
+	ln -sf $INSTALL_BASE/node/$PACKAGE_VERSION/bin/node /usr/bin/node
+	ln -sf $INSTALL_BASE/node/$PACKAGE_VERSION/bin/npm /usr/bin/npm
 fi
