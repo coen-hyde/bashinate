@@ -1,4 +1,3 @@
-# orc
+# bashinate
 
-Orc is a simple (single-machine focused) installation and orchestration library for installing software onto Linux distributions.
-
+System (single machine focused) provisioning tool using [BASH scripting](http://tldp.org/LDP/abs/html/) to install required system packages.

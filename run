@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # initialise locations
-ORC_HOME=~/.orc
+BASHINATE_HOME=~/.bashinate
 
 # initialise elements remote and local
-ELEMENTS_REMOTE=https://raw.github.com/DamonOehlman/orc/master/elements
-ELEMENTS_LOCAL=$ORC_HOME/elements
+ELEMENTS_REMOTE=https://raw.github.com/DamonOehlman/bashinate/master/elements
+ELEMENTS_LOCAL=$BASHINATE_/elements
 
 # ## require(element *args)
 # The require function is used to include a particular element in the provisioning process.  For instance,
