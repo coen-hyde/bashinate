@@ -4,10 +4,11 @@
 BASHINATE_HOME=~/.bashinate
 
 # initialise elements remote and local
-ELEMENTS_REMOTE=https://raw.github.com/DamonOehlman/bashinate/master/elements
-ELEMENTS_LOCAL=$BASHINATE_/elements
+SCRIPTLETS_REMOTE=https://raw.github.com/DamonOehlman/bashinate/master/scriptlets
+SCRIPTLETS_LOCAL=$BASHINATE_HOME/scriptlets
 
-# ## require(element *args)
+# ## require element *args
+#
 # The require function is used to include a particular element in the provisioning process.  For instance,
 # if you wanted to orchestrate the installation of node then you would use a statement similar to the one
 # below:
@@ -16,14 +17,26 @@ ELEMENTS_LOCAL=$BASHINATE_/elements
 # require node
 # ```
 function require {
-	# first look in an elements directory relative to the current working directory
-	el=$(pwd)/elements/$1
+	# first look in an scriptlets directory relative to the current working directory
+	el=$(pwd)/scriptlets/$1
 
 	# if we don't have a cwd element override, use the local repository
-	[[ -f $el ]] || el=$ELEMENTS_LOCAL/$1
+	[[ -f $el ]] || el=$SCRIPTLETS_LOCAL/$1
 
-	echo $el
+	# if we don't have the required element, then abort
+	if [[ ! -f $el ]]; then abort "Unable to require \"$1\" scriptlet."; fi
+
+	# include the source file
+	source $el
+}
+
+# ## abort msg
+# 
+# The abort function is used to exit the script with an error code and report the error
+# on the console.
+function abort {
+	echo $1; exit 1
 }
 
 # ensure we have an ~/.orc directory
-mkdir -p $ELEMENTS_LOCAL
+mkdir -p $SCRIPTLETS_LOCAL
