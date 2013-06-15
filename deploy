@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Usage: ./deploy.sh [scriptlet] [host] [sshoptions]
+
+scriptlet=$1
+shift
+
+host=$1
+shift
+
+# The host key might change when we instantiate a new VM, so
+# we remove (-R) the old host key from known_hosts
+ssh-keygen -R "${host#*@}" 2> /dev/null
+
+tar cz . | ssh -o 'StrictHostKeyChecking no' $* "${host}" "
+rm -rf /tmp/bashinate &&
+mkdir /tmp/bashinate &&
+cd /tmp/bashinate &&
+tar xz &&
+chmod 755 run &&
+source run &&
+require ${scriptlet}"
